@@ -1,3 +1,4 @@
+import os, sys
 import configparser
 from datetime import datetime
 
@@ -20,7 +21,12 @@ if __name__ == '__main__':
     print()
 
     config = configparser.ConfigParser()
-    res = config.read('config.ini')
+
+    EXE_DIR = os.path.dirname(sys.executable)
+    CONFIG_PATH = os.path.abspath(EXE_DIR + '/config.ini')
+    
+    print('Loading config from ' + CONFIG_PATH)
+    res = config.read(CONFIG_PATH)
 
     if (res == []):
         print('ERROR: Config file not found')
