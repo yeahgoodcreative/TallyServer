@@ -1,6 +1,6 @@
-python3 -m install python-osc
+python3 -m pip install python-osc
 
-python3 -m install -U pyinstaller
+python3 -m pip install -U pyinstaller
 python3 -m PyInstaller --onefile tallyserver.py
 
 Note: make sure to copy config.ini file across
