@@ -1,3 +1,6 @@
+import configparser
+from datetime import datetime
+
 from enum import Enum
 from multiprocessing.dummy import Array
 
@@ -11,16 +14,51 @@ from pythonosc.osc_bundle_builder import IMMEDIATELY as OscBundleBuilderIMMEDIAT
 from pythonosc.osc_message_builder import OscMessageBuilder
 
 
-    
-
 if __name__ == '__main__':
+    print("TallyServer V1.1.0")
+    print("Developed by Yeah Good Creative (www.yeahgoodcreative.com.au)")
+    print()
+
+    config = configparser.ConfigParser()
+    res = config.read('config.ini')
+
+    if (res == []):
+        print('ERROR: Config file not found')
+        while True: 
+            None
+
+    print('Reading parameters from config file...')
+    print()
+
+    tallyServerAddress      = config['DEFAULT']['TallyServerAddress']
+    tallyServerPort         = int(config['DEFAULT']['TallyServerPort'])
+    print('\tTally Server Address: \t' + tallyServerAddress)
+    print('\tTally Server Port: \t' + str(tallyServerPort))
+    print()
+
+    qlabAddress             = config['DEFAULT']['QlabAddress']
+    qlabPort                = int(config['DEFAULT']['QlabPort'])
+    print('\tQLab Address: \t\t' + qlabAddress)
+    print('\tQLab Port: \t\t' + str(qlabPort))
+    print()
+
+    remotesAddress          = config['DEFAULT']['RemotesAddress']
+    remotesPort             = int(config['DEFAULT']['RemotesPort'])
+    print('\tRemotes Address: \t' + remotesAddress)
+    print('\tRemotes Port: \t\t' + str(remotesPort))
+    print()
+
+    participants            = int(config['DEFAULT']['Participants'])
+    print('\tParticipants: \t\t' + str(participants))
+    print()
+
     class State(Enum):
         STARTED     = 0
         STOPPED     = 1
 
     STATE           = State.STOPPED
 
-    participants = 25
+    # participants = 25
     votes = [0] * participants
 
     votes1 = 0
@@ -56,7 +94,7 @@ if __name__ == '__main__':
     def tally():
         global votes1; global votes2; global votes3; global votesT
 
-        print('TALLY G: ' + str(votes1) + ' B: ' + str(votes2) + ' R: ' + str(votes3) + ' TOTAL: ' + str(votesT))
+        print(str(datetime.now()) + '\t\t' + 'TALLY G: ' + str(votes1) + ' B: ' + str(votes2) + ' R: ' + str(votes3) + ' TOTAL: ' + str(votesT))
         qlab_client.send_message('/cue/g' + str(votes1) + '/start', None)
         qlab_client.send_message('/cue/b' + str(votes2) + '/start', None)
         qlab_client.send_message('/cue/r' + str(votes3) + '/start', None)
@@ -104,16 +142,24 @@ if __name__ == '__main__':
         match address:
             case '/tally/reset':
                 votes = [0] * participants
+                countVotes()
+                print(str(datetime.now()) + '\t\t' + 'TALLY RESET')
+                print(str(datetime.now()) + '\t\t' + 'TALLY G: ' + str(votes1) + ' B: ' + str(votes2) + ' R: ' + str(votes3) + ' TOTAL: ' + str(votesT))
+
 
             case '/tally/start':
                 if (STATE == State.STOPPED):
                     STATE = State.STARTED
                     remote_client.send_message('/remotes/leds', [255, 255, 255])
+                    print(str(datetime.now()) + '\t\t' + 'TALLY START')
+
 
             case '/tally/stop':
                 if (STATE == State.STARTED):
                     STATE = State.STOPPED
+                    print(str(datetime.now()) + '\t\t' + 'TALLY STOP')
                 remote_client.send_message('/remotes/leds', [0, 0, 0])
+                
 
 
     def remote_handler(address, *args):
@@ -127,6 +173,8 @@ if __name__ == '__main__':
 
                 remote = splitAddress[0]
                 button = splitAddress[2]
+
+                print(str(datetime.now()) + '\t\t' + 'RECEIVED Remote ' + str(remote) + ' Button ' + str(button))
 
                 match button:
                     case '1':
@@ -188,4 +236,6 @@ if __name__ == '__main__':
     dispatcher.map('/tally/*/button/*', remote_handler)
 
     server = BlockingOSCUDPServer(('0.0.0.0', 53001), dispatcher)
+
+    print('Starting server...')
     server.serve_forever()  # Blocks forever
