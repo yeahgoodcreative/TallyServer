@@ -94,8 +94,8 @@ if __name__ == '__main__':
 
 
 
-    qlab_client = SimpleUDPClient('10.0.0.10', 53000, True)
-    remote_client = SimpleUDPClient('10.255.255.255', 53002, True)
+    qlab_client = SimpleUDPClient(qlabAddress, qlabPort, True)
+    remote_client = SimpleUDPClient(remotesAddress, remotesPort, True)
 
     def tally():
         global votes1; global votes2; global votes3; global votesT
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     dispatcher.map('/tally/*', qlab_handler)
     dispatcher.map('/tally/*/button/*', remote_handler)
 
-    server = BlockingOSCUDPServer(('0.0.0.0', 53001), dispatcher)
+    server = BlockingOSCUDPServer((tallyServerAddress, tallyServerPort), dispatcher)
 
     print('Starting server...')
     server.serve_forever()  # Blocks forever
