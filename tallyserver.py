@@ -16,7 +16,7 @@ from pythonosc.osc_message_builder import OscMessageBuilder
 
 
 if __name__ == '__main__':
-    print("TallyServer V1.1.0")
+    print("TallyServer V1.1.1")
     print("Developed by Yeah Good Creative (www.yeahgoodcreative.com.au)")
     print()
 
